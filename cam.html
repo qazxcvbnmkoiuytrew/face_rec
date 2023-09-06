@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pi Video Surveillance</title>
+</head>
+<body>
+<h1>Pi Video Surveillance</h1>
+<img style="width: 800px; height: 600px;" src="{{ url_for('video_feed') }}" id="video_feed">
+{% if taken_photo %}
+    <img src="{{ url_for('static', filename=taken_photo) }}" style="max-width: 400px; display: none;" id="taken_photo">
+{% endif %}
+<br>
+<form id="photo-form">
+    <button type="button" onclick="takePhoto()" id="take-photo-btn">拍照</button>
+    <button type="button" onclick="savePhoto()" id="save-photo-btn" class="hidden">儲存照片</button>
+    <button type="button" onclick="retakePhoto()" id="retake-photo-btn" class="hidden">重拍一張</button>
+</form>
+
+<script>
+    var isPhotoTaken = false; // 用于跟踪是否已经拍摄了照片
+    function takePhoto() {
+        fetch('/take_photo', { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('video_feed').style.display = 'none'; // 隐藏视频流画面
+                document.getElementById('taken_photo').style.display = 'block'; // 显示拍摄的照片
+                document.getElementById('taken_photo').src = data;
+                isPhotoTaken = true; // 设置标志为已拍摄
+
+                document.getElementById('take-photo-btn').classList.add('hidden');
+                document.getElementById('save-photo-btn').classList.remove('hidden');
+                document.getElementById('retake-photo-btn').classList.remove('hidden');
+            });
+    }
+
+    function savePhoto() {
+        if (isPhotoTaken) {
+            fetch('/save_photo', { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('video_feed').style.display = 'block'; // 显示视频流画面
+                    document.getElementById('taken_photo').style.display = 'none'; // 隐藏照片
+                    document.getElementById('taken_photo').src = ''; // 清除照片
+                    isPhotoTaken = false; // 设置标志为未拍摄
+                });
+        }
+    }
+
+    function retakePhoto() {
+        if (isPhotoTaken) {
+            fetch('/retake_photo', { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('video_feed').style.display = 'block'; // 显示视频流画面
+                    document.getElementById('taken_photo').style.display = 'none'; // 隐藏照片
+                    document.getElementById('taken_photo').src = ''; // 清除照片
+                    isPhotoTaken = false; // 设置标志为未拍摄
+                });
+        }
+    }
+
+</script>
+
+</body>
+</html>

@@ -7,7 +7,7 @@
 <h1>Pi Video Surveillance</h1>
 <img style="width: 800px; height: 600px;" src="{{ url_for('video_feed') }}" id="video_feed">
 {% if taken_photo %}
-    <img src="{{ url_for('static', filename=taken_photo) }}" style="max-width: 400px; display: none;" id="taken_photo">
+    <img src="{{ url_for('static', filename=taken_photo) }}" style="max-width: 400px; display: block;" id="taken_photo">
 {% endif %}
 <br>
 <form id="photo-form">
@@ -17,14 +17,19 @@
 </form>
 
 <script>
-    var isPhotoTaken = false; // 用于跟踪是否已经拍摄了照片
+    var isPhotoTaken = true; // 用于跟踪是否已经拍摄了照片
     function takePhoto() {
         fetch('/take_photo', { method: 'POST' })
             .then(response => response.text())
             .then(data => {
-                document.getElementById('video_feed').style.display = 'none'; // 隐藏视频流画面
-                document.getElementById('taken_photo').style.display = 'block'; // 显示拍摄的照片
-                document.getElementById('taken_photo').src = data;
+                console.log('Received data:', data);
+                var videoFeedElement = document.getElementById('video_feed');
+                var takenPhotoElement = document.getElementById('taken_photo');
+                // 隐藏摄像头画面
+                videoFeedElement.style.display = 'none';
+                // 显示拍摄的照片
+                takenPhotoElement.style.display = 'block';
+                takenPhotoElement.src = data; // 设置照片的 src 属性
                 isPhotoTaken = true; // 设置标志为已拍摄
 
                 document.getElementById('take-photo-btn').classList.add('hidden');
